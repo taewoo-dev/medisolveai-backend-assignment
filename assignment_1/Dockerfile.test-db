@@ -1,0 +1,20 @@
+FROM mysql:8.0
+
+# 기본 환경 변수 설정
+ENV MYSQL_ROOT_PASSWORD=hospital123 \
+    MYSQL_DATABASE=hospital_management_test \
+    MYSQL_USER=hospital_user \
+    MYSQL_PASSWORD=hospital_pass
+
+# 초기 스키마 및 테스트 데이터 로딩 (테스트 DB명에 맞게 변환)
+COPY database/init.sql /tmp/init.sql
+COPY database/test_data.sql /tmp/test_data.sql
+
+RUN sed "s/hospital_management/hospital_management_test/g" /tmp/init.sql > /docker-entrypoint-initdb.d/01-init.sql \
+    && sed "s/hospital_management/hospital_management_test/g" /tmp/test_data.sql > /docker-entrypoint-initdb.d/02-test-data.sql
+
+# UTF-8 환경 보장
+CMD ["mysqld", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci", "--skip-character-set-client-handshake"]
+
+EXPOSE 3306
+

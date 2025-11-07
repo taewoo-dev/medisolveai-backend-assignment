@@ -1,0 +1,87 @@
+version: "3.9"
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: hospital_db
+    environment:
+      MYSQL_ROOT_PASSWORD: hospital123
+      MYSQL_DATABASE: hospital_management
+      MYSQL_USER: hospital_user
+      MYSQL_PASSWORD: hospital_pass
+    command: ["mysqld", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci", "--skip-character-set-client-handshake"]
+    ports:
+      - "3308:3306"
+    volumes:
+      - ./database/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./database/test_data.sql:/docker-entrypoint-initdb.d/02-test-data.sql
+      - mysql_data:/var/lib/mysql
+    networks:
+      - hospital_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  patient-api:
+    build: ./patient
+    container_name: patient_api
+    environment:
+      ENVIRONMENT: stage
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: hospital_user
+      DB_PASSWORD: hospital_pass
+      DB_NAME: hospital_management
+    expose:
+      - "8001"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - hospital_network
+
+  admin-api:
+    build: ./admin
+    container_name: admin_api
+    environment:
+      ENVIRONMENT: stage
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: hospital_user
+      DB_PASSWORD: hospital_pass
+      DB_NAME: hospital_management
+    expose:
+      - "8002"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - hospital_network
+
+  gateway:
+    build: ./gateway
+    container_name: api_gateway
+    ports:
+      - "8000:8000"
+    environment:
+      ENVIRONMENT: stage
+      PATIENT_API_HOST: patient-api
+      PATIENT_API_PORT: 8001
+      ADMIN_API_HOST: admin-api
+      ADMIN_API_PORT: 8002
+    depends_on:
+      patient-api:
+        condition: service_started
+      admin-api:
+        condition: service_started
+    networks:
+      - hospital_network
+
+networks:
+  hospital_network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
