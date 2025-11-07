@@ -1,0 +1,64 @@
+[project]
+name = "api-gateway"
+version = "0.1.0"
+description = "API Gateway - 단일 진입점"
+authors = [
+    {name = "Developer", email = "developer@example.com"},
+]
+readme = "../README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi[standard]>=0.121.0",
+    "httpx>=0.28.1",
+    "pydantic-settings>=2.11.0",
+]
+
+[dependency-groups]
+dev = [
+    "black>=25.9.0",
+    "coverage>=7.11.0",
+    "httpx>=0.28.1",
+    "mypy>=1.18.2",
+    "pytest>=8.4.2",
+    "pytest-asyncio>=1.2.0",
+    "ruff>=0.14.3",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+testpaths = ["app/tests"]
+pythonpath = ["."]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+explicit_package_bases = true
+plugins = [
+    "pydantic.mypy",
+]
+
+[[tool.mypy.overrides]]
+module = [
+    "asyncmy.*",
+]
+ignore_missing_imports = true
+
+[tool.black]
+line-length = 120
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = [
+    "E501", # Line too long
+]
