@@ -1,0 +1,1 @@
+"""Admin Treatment API Tests"""
