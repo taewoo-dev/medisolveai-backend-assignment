@@ -2,7 +2,7 @@
 
 ## 소개
 이 디렉터리는 메디솔브 AI 백엔드 과제 2(난수 생성 함수 구현) 제출용입니다.  
-- 핵심 구현: `random_generator.py` (`get_1_or_0`, `get_random`)
+- 소스 코드: `random_generator.py` (`get_1_or_0`, `get_random`)
 - 테스트 코드: `tests/test_random_generator.py`
 
 ## 환경 설정
